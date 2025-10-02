@@ -34,3 +34,28 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Cloudinary image uploads
+
+This project optionally supports uploading images to Cloudinary from the editor and post forms.
+
+To enable uploads, set the following environment variables in your `.env.local`:
+
+- `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME` - your Cloudinary cloud name
+- `NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET` - an unsigned upload preset that accepts uploads from the browser
+
+Example `.env.local` entries:
+
+```bash
+NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=your-cloud-name
+NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET=your-unsigned-preset
+```
+
+If these variables are not present the editor will fall back to a simulated upload so you can continue developing without Cloudinary.
+
+To test uploads locally:
+
+1. Start the dev server: `npm run dev`
+2. Open `/posts/create` and use the image button in the editor toolbar or the cover image input to upload an image.
+3. Watch the network tab for a POST to `api.cloudinary.com` and verify the inserted image appears in the editor.
+
