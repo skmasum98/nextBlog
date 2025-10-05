@@ -3,33 +3,37 @@ import Image from 'next/image';
 import { getPaginatedPosts } from '@/lib/data'; // --- NEW: Import our pagination function ---
 import PaginationControls from '@/components/PaginationControls'; // --- NEW: Import pagination controls ---
 
+export const dynamic = 'force-dynamic';
+
 // The old getPosts() function that used fetch is no longer needed.
 
 // The page component now accepts searchParams to know the current page
 export default async function Home({ searchParams }) {
-  // --- NEW: Read the page number from the URL ---
-  const page = parseInt(searchParams.page || '1', 10);
-  const limit = 10; // We can set the number of posts per page here. 10 is a good default.
+  // Await searchParams because it's now a Promise
+  const params = await searchParams;
+  
+  const page = parseInt(params?.page || '1', 10);
+  const limit = 10;
 
-  // --- NEW: Fetch only the data for the current page ---
   const { posts, currentPage, totalPages } = await getPaginatedPosts({ page, limit });
 
-  // Function to create a clean text snippet
   const createSnippet = (html) => {
     if (!html) return '';
-    const text = html.replace(/<[^>]+>/g, ''); // Strip all HTML tags
+    const text = html.replace(/<[^>]+>/g, ''); 
     return text.length > 150 ? `${text.substring(0, 150)}...` : text;
   };
 
   return (
-    // You had <main> here, but since the layout provides the <main> tag, a <div> is more appropriate
     <div className="w-full">
       <h1 className="text-4xl font-bold mb-8">Latest Posts</h1>
 
       <div className="space-y-8">
         {posts.length > 0 ? (
           posts.map((post) => (
-            <div key={post._id} className="bg-white p-6 rounded-lg shadow-md flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-6">
+            <div
+              key={post._id}
+              className="bg-white p-6 rounded-lg shadow-md flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-6"
+            >
               {post.coverImage && (
                 <div className="flex-shrink-0 w-full sm:w-48">
                   <Link href={`/posts/${post._id}`}>
@@ -73,9 +77,7 @@ export default async function Home({ searchParams }) {
         )}
       </div>
 
-      {/* --- NEW: Add the Pagination Controls at the bottom --- */}
       <PaginationControls totalPages={totalPages} currentPage={currentPage} />
-
     </div>
   );
 }

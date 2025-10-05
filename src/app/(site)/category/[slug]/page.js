@@ -4,6 +4,8 @@ import { getPostsByCategorySlug } from '@/lib/data'; // Import our new function
 
 import PaginationControls from '@/components/PaginationControls'; // Import pagination controls
 
+export const dynamic = 'force-dynamic';
+
 export default async function CategoryPage({ params, searchParams }) {
   // --- CORRECTED: No 'await' on params ---
   const { slug } = params;
