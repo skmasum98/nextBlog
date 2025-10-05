@@ -12,7 +12,7 @@ export default async function Sidebar() {
   return (
     <aside className="w-full lg:w-1/4 p-4">
       {/* Categories Widget */}
-      <div className="bg-white p-6 rounded-lg shadow-md mb-8">
+      <div className="bg-white rounded-lg shadow-md mb-8">
         <h3 className="text-xl font-bold mb-4">Categories</h3>
         <ul className="space-y-2">
           {categories.map((category) => (
@@ -29,7 +29,7 @@ export default async function Sidebar() {
       </div>
 
       {/* Recent Posts Widget */}
-      <div className="bg-white p-6 rounded-lg shadow-md">
+      <div className="bg-white rounded-lg shadow-md">
         <h3 className="text-xl font-bold mb-4">Recent Posts</h3>
         <ul className="space-y-4">
           {recentPosts.map((post) => (

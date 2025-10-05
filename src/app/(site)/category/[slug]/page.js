@@ -2,15 +2,30 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { getPostsByCategorySlug } from '@/lib/data'; // Import our new function
 
-export default async function CategoryPage({ params }) {
-  const { slug } = await params;
-   
+import PaginationControls from '@/components/PaginationControls'; // Import pagination controls
+
+export default async function CategoryPage({ params, searchParams }) {
+  // --- CORRECTED: No 'await' on params ---
+  const { slug } = params;
+  
+  // --- NEW: Read page number from URL ---
+  const page = parseInt(searchParams.page || '1', 10);
+  const limit = 10; // Posts per page
+
   try {
-    // --- THIS IS THE NEW, DIRECT DATABASE CALL ---
-    const { posts, category } = await getPostsByCategorySlug(slug);
+    // --- NEW: Pass slug and pagination options to the function ---
+    const { posts, category, currentPage, totalPages } = await getPostsByCategorySlug({ slug, page, limit });
+
+    // Helper function for snippets
+    const createSnippet = (html) => {
+        if (!html) return '';
+        const text = html.replace(/<[^>]+>/g, '');
+        return text.length > 150 ? `${text.substring(0, 150)}...` : text;
+    };
+
 
     return (
-      <main className="container mx-auto px-4 py-8">
+      <main className="w-full">
         <h1 className="text-4xl font-bold mb-8">
           Category: <span className="text-indigo-600">{category.name}</span>
         </h1>
@@ -55,7 +70,12 @@ export default async function CategoryPage({ params }) {
           ) : (
             <p>No posts found in this category.</p>
           )}
+
+
         </div>
+        {totalPages > 1 && (
+            <PaginationControls totalPages={totalPages} currentPage={currentPage} />
+        )}
       </main>
     );
   } catch (error) {

@@ -1,63 +1,70 @@
 import Link from 'next/link';
 import Image from 'next/image'; 
-import DOMPurify from 'isomorphic-dompurify';
+import { getPaginatedPosts } from '@/lib/data'; // --- NEW: Import our pagination function ---
+import PaginationControls from '@/components/PaginationControls'; // --- NEW: Import pagination controls ---
 
-// This function fetches our data on the server
-async function getPosts() {
-  // We use localhost here because this fetch runs on the server
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/posts`, {
-    cache: 'no-store', // This ensures we get fresh data on every request
-  });
+// The old getPosts() function that used fetch is no longer needed.
 
-  if (!res.ok) {
-    // This will be caught by the Error Boundary
-    throw new Error('Failed to fetch posts');
-  }
+// The page component now accepts searchParams to know the current page
+export default async function Home({ searchParams }) {
+  // --- NEW: Read the page number from the URL ---
+  const page = parseInt(searchParams.page || '1', 10);
+  const limit = 10; // We can set the number of posts per page here. 10 is a good default.
 
-  return res.json();
-}
+  // --- NEW: Fetch only the data for the current page ---
+  const { posts, currentPage, totalPages } = await getPaginatedPosts({ page, limit });
 
-// The page component is now an async function
-export default async function Home() {
-  const { posts } = await getPosts();
+  // Function to create a clean text snippet
+  const createSnippet = (html) => {
+    if (!html) return '';
+    const text = html.replace(/<[^>]+>/g, ''); // Strip all HTML tags
+    return text.length > 150 ? `${text.substring(0, 150)}...` : text;
+  };
 
   return (
-    <main className="w-full">
-      
+    // You had <main> here, but since the layout provides the <main> tag, a <div> is more appropriate
+    <div className="w-full">
+      <h1 className="text-4xl font-bold mb-8">Latest Posts</h1>
 
       <div className="space-y-8">
         {posts.length > 0 ? (
           posts.map((post) => (
-            <div key={post._id} className="bg-white p-6 rounded-lg shadow-md flex space-x-6">
+            <div key={post._id} className="bg-white p-6 rounded-lg shadow-md flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-6">
               {post.coverImage && (
-                <div className="flex-shrink-0">
-                  <Image
-                    src={post.coverImage}
-                    alt={post.title}
-                    width={150}
-                    height={150}
-                    className="object-cover rounded-md"
-                  />
+                <div className="flex-shrink-0 w-full sm:w-48">
+                  <Link href={`/posts/${post._id}`}>
+                    <Image
+                      src={post.coverImage}
+                      alt={post.title}
+                      width={200}
+                      height={150}
+                      className="object-cover rounded-md w-full h-48 sm:w-48 sm:h-full"
+                    />
+                  </Link>
                 </div>
               )}
-              <div>
+              <div className="flex flex-col flex-grow">
+                <div className="flex items-center text-sm text-gray-500 mb-2 space-x-2 flex-wrap">
+                  {post.category && (
+                    <Link href={`/category/${post.category.slug}`}>
+                      <span className="bg-indigo-100 text-indigo-800 px-2 py-1 rounded-full text-xs font-semibold hover:bg-indigo-200">
+                        {post.category.name}
+                      </span>
+                    </Link>
+                  )}
+                  <span className="hidden sm:inline">•</span>
+                  <span>By {post.author ? post.author.name : 'Unknown'}</span>
+                  <span>•</span>
+                  <span>{new Date(post.createdAt).toLocaleDateString()}</span>
+                </div>
+
                 <Link href={`/posts/${post._id}`}>
                   <h2 className="text-2xl font-semibold mb-2 hover:text-indigo-600">{post.title}</h2>
                 </Link>
-                <div className="flex items-center text-sm text-gray-500 mb-4 space-x-2">
-  <span>By {post.author ? post.author.name : 'Unknown'}</span>
-  <span>•</span>
-  <span>{new Date(post.createdAt).toLocaleDateString()}</span>
-  {post.category && (
-    <>
-      <span>•</span>
-      <span className="bg-indigo-100 text-indigo-800 px-2 py-1 rounded-full text-xs font-semibold">
-        {post.category.name}
-      </span>
-    </>
-  )}
-</div>
-                <p className="text-gray-700 whitespace-pre-wrap">{(post.content ? DOMPurify.sanitize(post.content, { ALLOWED_TAGS: [] }) : '').substring(0, 150)}{post.content && post.content.length > 150 ? '...' : ''}</p>
+
+                <p className="text-gray-700 flex-grow">
+                  {createSnippet(post.content)}
+                </p>
               </div>
             </div>
           ))
@@ -65,6 +72,10 @@ export default async function Home() {
           <p>No posts found.</p>
         )}
       </div>
-    </main>
+
+      {/* --- NEW: Add the Pagination Controls at the bottom --- */}
+      <PaginationControls totalPages={totalPages} currentPage={currentPage} />
+
+    </div>
   );
 }
