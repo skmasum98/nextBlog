@@ -13,7 +13,7 @@ export default async function Header() {
       <nav className="container mx-auto px-4 py-3 flex justify-between items-center">
         {/* Site Title/Logo */}
         <Link href="/" className="text-2xl font-bold text-indigo-600">
-          BlogPlatform
+          THEWEBPAL
         </Link>
 
         {/* Search Bar (visible on medium screens and up) */}
