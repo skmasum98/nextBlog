@@ -129,7 +129,7 @@ export default function LoginPage() {
 
         {/* Link to Register Page */}
         <div className="text-sm text-center text-gray-600">
-          Don't have an account yet?{' '}
+          Don&apos;t have an account yet?{' '}
           <Link href="/register" passHref>
             <div className="font-medium text-indigo-600 hover:text-indigo-500 hover:underline cursor-pointer inline-block">
               Sign up
