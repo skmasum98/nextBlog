@@ -1,26 +1,19 @@
 import dbConnect from '@/lib/dbConnect';
 import Post from '@/models/Post';
 import { NextResponse } from 'next/server';
-import { jwtVerify } from 'jose';
-import { cookies } from 'next/headers'; // Import cookies
+import { getUserSession } from '@/lib/session';
 import User from '@/models/User';
+import Category from '@/models/Category'; // --- NEW: Import Category model ---
 
-const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
-
-// GET /api/posts - Fetch all posts
-
+// GET /api/posts - Fetch all posts (UPDATED)
 export async function GET() {
   try {
     await dbConnect();
 
-    // Find all posts and sort them by creation date (newest first)
-    // Then, populate the 'author' field with the 'name' from the User model
     const posts = await Post.find({})
-      .populate({
-        path: 'author',
-        select: 'name', // Only select the 'name' field of the author
-        model: User, // Explicitly specify the User model
-      })
+      .populate({ path: 'author', select: 'name', model: User })
+      // --- NEW: Populate category as well ---
+      .populate({ path: 'category', select: 'name slug', model: Category })
       .sort({ createdAt: -1 });
 
     return NextResponse.json({ posts }, { status: 200 });
@@ -33,50 +26,43 @@ export async function GET() {
   }
 }
 
+// POST /api/posts - Create a new post (UPDATED)
 
-// POST /api/posts - Create a new post (requires authentication)
 export async function POST(request) {
   try {
-  // 1. Get the token from the cookie
-  const c = await cookies();
-  const tokenCookie = c.get('token');
-    if (!tokenCookie) {
+    const session = await getUserSession();
+    if (!session) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
-    const token = tokenCookie.value;
 
-    // 2. Verify the token and get the user's ID from the payload
-    let payload;
-    try {
-      const { payload: verifiedPayload } = await jwtVerify(token, JWT_SECRET);
-      payload = verifiedPayload;
-    } catch (err) {
-      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
-    }
-
-    const userId = payload.id; // The user ID from the JWT
-
-    // 3. Connect to the database
     await dbConnect();
 
-    // 4. Parse the request body
-    const { title, content, coverImage } = await request.json();
+    // --- NEW: Destructure 'category' from the body ---
+    const { title, content, coverImage, category } = await request.json();
 
-    if (!title || !content) {
+    // --- NEW: Add category to validation ---
+    if (!title || !title.trim() || !content || content === '<p></p>' || !category) {
       return NextResponse.json(
-        { error: 'Title and content are required' },
+        { error: 'Title, content, and category are required' },
         { status: 400 }
       );
     }
 
-    // 5. Create the new post, linking it to the author
+    // --- NEW: Add category to the create object ---
     const newPost = await Post.create({
-      title,
+      title: title.trim(),
       content,
-      author: userId, // Associate the post with the logged-in user
-      coverImage,
+      author: session.id,
+      coverImage: coverImage || '',
+      category, // Add category here
     });
 
+    // Populate for the response
+    await newPost.populate([
+        { path: 'author', select: 'name', model: User },
+        { path: 'category', select: 'name slug', model: Category }
+    ]);
+    
     return NextResponse.json(
       { message: 'Post created successfully', post: newPost },
       { status: 201 }
@@ -84,7 +70,10 @@ export async function POST(request) {
   } catch (error) {
     console.error('Post Creation Error:', error);
     if (error.name === 'ValidationError') {
-      return NextResponse.json({ error: 'Validation failed', details: error.errors }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Validation failed', details: error.errors }, 
+        { status: 400 }
+      );
     }
     return NextResponse.json(
       { error: 'An internal server error occurred' },
@@ -92,4 +81,3 @@ export async function POST(request) {
     );
   }
 }
-

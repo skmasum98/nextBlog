@@ -10,7 +10,7 @@ const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
 
 // GET handler to fetch comments for a post
 export async function GET(request, { params }) {
-  const { postId } = params;
+  const { postId } = await params;
 
   try {
     await dbConnect();
@@ -35,7 +35,7 @@ export async function GET(request, { params }) {
 
 // POST handler to create a new comment
 export async function POST(request, { params }) {
-  const { postId } = params;
+  const { postId } = await params;
 
   try {
   // 1. Authenticate the user

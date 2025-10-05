@@ -1,7 +1,8 @@
 import Link from 'next/link';
-import SearchBar from '@/components/SearchBar'; // Import the new component
+
 import './globals.css';
 import Header from '@/components/Header';
+
 
 export const metadata = {
   title: 'Next.js Blog Platform',
@@ -14,6 +15,7 @@ export default function RootLayout({ children }) {
       <body className="bg-gray-100 text-gray-900 pt-8"> {/* Add padding-top to prevent content from hiding under the sticky header */}
         <Header /> 
         <main>{children}</main>
+       
       </body>
     </html>
   );

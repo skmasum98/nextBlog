@@ -25,6 +25,11 @@ const PostSchema = new mongoose.Schema(
     coverImage: { 
       type: String, 
     },
+    category: { 
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Category',
+      required: [true, 'Please select a category'], // Make it required
+    },
   },
   {
     timestamps: true,
