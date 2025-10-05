@@ -15,13 +15,12 @@ export default function DashboardPage() {
     const [phone, setPhone] = useState('');
     const [message, setMessage] = useState('');
 
-    // Fetch user data and posts on component mount
+    // --- Using useCallback is good practice here ---
     const fetchData = useCallback(async () => {
+        setIsLoading(true); // Set loading to true at the start of a fetch
         try {
             const res = await fetch('/api/profile');
             if (!res.ok) {
-                // If not authenticated, the middleware should have already redirected.
-                // This is a fallback.
                 router.push("/login");
                 return;
             }
@@ -32,6 +31,7 @@ export default function DashboardPage() {
             setPhone(data.user.phone || '');
         } catch (error) {
             console.error("Failed to fetch dashboard data", error);
+            setMessage('❌ Failed to load dashboard data.');
         } finally {
             setIsLoading(false);
         }
@@ -43,6 +43,8 @@ export default function DashboardPage() {
 
     const handleLogout = async () => {
         await fetch('/api/auth/logout');
+        // --- NEW: Refresh the router to clear session state from the server's perspective ---
+        router.refresh();
         router.push('/login');
     };
 
@@ -58,10 +60,12 @@ export default function DashboardPage() {
         
         const data = await res.json();
         if (res.ok) {
-            setMessage('Profile updated successfully!');
-            setUser(data.user); // Update user state with new data
+            setMessage('✅ Profile updated successfully!');
+            setUser(data.user);
+            // --- NEW: Refresh to update the Header component with the new name ---
+            router.refresh(); 
         } else {
-            setMessage(`Error: ${data.error}`);
+            setMessage(`❌ Error: ${data.error}`);
         }
     };
 
@@ -75,19 +79,27 @@ export default function DashboardPage() {
                 throw new Error(data.error || 'Failed to delete post');
             }
             alert('Post deleted successfully!');
-            fetchData(); // Refresh the list of posts
+            
+            // --- INSTEAD of calling fetchData(), we just update the local state ---
+            // This provides a faster, more optimistic UI update.
+            setPosts(prevPosts => prevPosts.filter(p => p._id !== postId));
+
         } catch (error) {
             alert(`Error: ${error.message}`);
         }
     };
 
     if (isLoading) {
-        return <div className="text-center py-10">Loading...</div>;
+        // --- A more visually appealing loader ---
+        return (
+            <div className="flex justify-center items-center h-screen">
+                <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-indigo-500"></div>
+            </div>
+        );
     }
 
     if (!user) {
-        // This can be shown briefly before the redirect happens
-        return <div className="text-center py-10">Please log in to view your dashboard.</div>;
+        return <div className="text-center py-10">Redirecting to login...</div>;
     }
 
     return (
@@ -126,18 +138,20 @@ export default function DashboardPage() {
 
                 {/* User's Posts */}
                 <div className="md:col-span-2 bg-white p-6 rounded-lg shadow-md">
-                    <h2 className="text-2xl font-semibold mb-4">Your Posts</h2>
+                    <h2 className="text-2xl font-semibold mb-4">Your Posts ({posts.length})</h2>
                     <div className="space-y-4">
                         {posts.length > 0 ? (
                             posts.map(post => (
-                                <div key={post._id} className="border p-4 rounded-md">
-                                    <Link href={`/posts/${post._id}`}>
-                                        <h3 className="text-xl font-bold hover:text-indigo-600">{post.title}</h3>
-                                    </Link>
-                                    <p className="text-sm text-gray-500">
-                                        Created on {new Date(post.createdAt).toLocaleDateString()}
-                                    </p>
-                                    <div className="flex space-x-2">
+                                <div key={post._id} className="border p-4 rounded-md flex justify-between items-center">
+                                    <div>
+                                        <Link href={`/posts/${post._id}`}>
+                                            <h3 className="text-xl font-bold hover:text-indigo-600">{post.title}</h3>
+                                        </Link>
+                                        <p className="text-sm text-gray-500">
+                                            Created on {new Date(post.createdAt).toLocaleDateString()}
+                                        </p>
+                                    </div>
+                                    <div className="flex space-x-2 flex-shrink-0">
                                         <Link href={`/posts/${post._id}/edit`} className="bg-blue-500 text-white px-3 py-1 text-sm rounded-md hover:bg-blue-600">
                                             Edit
                                         </Link>

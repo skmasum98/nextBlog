@@ -33,8 +33,9 @@ export default function LoginPage() {
       setMessage('✅ Login successful! Redirecting...');
       // On successful login, refresh the router to update session state across the app
       // and then push to the dashboard.
-      router.refresh(); 
+      
       router.push('/dashboard');
+      router.refresh(); 
       
     } catch (error) {
       setMessage(`❌ ${error.message}`);
