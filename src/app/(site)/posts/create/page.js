@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"; // Import useEffect
 import { useRouter } from "next/navigation";
 import RichTextEditor from "@/components/RichTextEditor";
+import Image from "next/image";
 
 export default function CreatePostPage() {
   const [title, setTitle] = useState("");
@@ -163,7 +164,8 @@ export default function CreatePostPage() {
             />
             {preview && (
               <div className="mt-4">
-                <img src={preview} alt="Preview" className="w-full h-56 object-cover rounded-lg shadow-sm" />
+                
+                <Image src={preview} alt="Preview" className="w-full h-56 object-cover rounded-lg shadow-sm" />
               </div>
             )}
           </div>
