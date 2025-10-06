@@ -44,8 +44,10 @@ export default function DashboardPage() {
     const handleLogout = async () => {
         await fetch('/api/auth/logout');
         // --- NEW: Refresh the router to clear session state from the server's perspective ---
-        router.refresh();
+        
         router.push('/login');
+        router.refresh();
+
     };
 
     const handleProfileUpdate = async (e) => {
