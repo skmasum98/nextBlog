@@ -8,7 +8,7 @@ import RichTextEditor from "@/components/RichTextEditor";
 export default function EditPostPage() {
   const router = useRouter();
   const params = useParams();
-  const { postId } = params;
+  const { slug } = params;
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -25,13 +25,13 @@ export default function EditPostPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
-    if (!postId) return;
+    if (!slug) return;
 
     const fetchInitialData = async () => {
       try {
         // Fetch post and categories in parallel for efficiency
         const [postRes, catRes] = await Promise.all([
-          fetch(`/api/posts/${postId}`),
+          fetch(`/api/posts/${slug}`),
           fetch('/api/categories')
         ]);
 
@@ -45,7 +45,7 @@ export default function EditPostPage() {
         setTitle(postData.post.title);
         setContent(postData.post.content);
         setCurrentImage(postData.post.coverImage || "");
-        setCategoryId(postData.post.category); // Set the current category
+        setCategoryId(postData.post.category._id); // Set the current category
 
         // Set categories state
         setCategories(catData.categories);
@@ -57,7 +57,7 @@ export default function EditPostPage() {
       }
     };
     fetchInitialData();
-  }, [postId]);
+  }, [slug]);
 
   const handleImageChange = (e) => {
     if (e.target.files && e.target.files[0]) {
@@ -104,7 +104,7 @@ export default function EditPostPage() {
       }
     }
 
-     const res = await fetch(`/api/posts/${postId}`, {
+     const res = await fetch(`/api/posts/${slug}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ 
@@ -119,7 +119,7 @@ export default function EditPostPage() {
     if (res.ok) {
       setMessage("✅ Post updated successfully!");
       setTimeout(() => {
-        router.push(`/posts/${postId}`);
+        router.push(`/posts/${data.post.slug}`);
         router.refresh();
       }, 1200);
     } else {

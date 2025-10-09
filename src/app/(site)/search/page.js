@@ -25,8 +25,8 @@ export default async function SearchPage({ searchParams }) {
       <div className="space-y-8">
         {posts.length > 0 ? (
           posts.map((post) => (
-            <div key={post._id} className="bg-white p-6 rounded-lg shadow-md">
-              <Link href={`/posts/${post._id}`}>
+            <div key={post.slug} className="bg-white p-6 rounded-lg shadow-md">
+              <Link href={`/posts/${post.slug}`}>
                 <h2 className="text-2xl font-semibold mb-2 hover:text-indigo-600">
                   {post.title}
                 </h2>

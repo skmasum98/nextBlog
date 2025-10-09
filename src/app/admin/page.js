@@ -169,7 +169,7 @@ export default function AdminPage() {
               by {post.author?.name || "Unknown"}
             </p>
             <button
-              onClick={() => handleDeletePost(post._id)}
+              onClick={() => handleDeletePost(post.slug)}
               className="bg-red-500 text-white px-3 py-1 text-sm rounded-md hover:bg-red-600"
             >
               Delete

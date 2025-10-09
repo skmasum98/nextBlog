@@ -7,7 +7,7 @@ import { cookies } from 'next/headers';
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
 
 export async function POST(request, { params }) {
-  const { postId } = params;
+  const { slug  } = params;
   
   try {
   // 1. Authenticate the user
@@ -33,7 +33,7 @@ export async function POST(request, { params }) {
     }
 
     await dbConnect();
-    const post = await Post.findById(postId);
+    const post = await Post.findOne({ slug });
     if (!post) {
       return NextResponse.json({ error: 'Post not found' }, { status: 404 });
     }

@@ -49,10 +49,10 @@ export default function LoginPage() {
         {/* Header Section */}
         <div className="text-center">
           <h1 className="text-3xl font-bold text-gray-900">
-            Welcome Back!
+            Welcome Back!{process.env.SITE_NAME ? ` to ${process.env.SITE_NAME}` : ''}
           </h1>
           <p className="mt-2 text-sm text-gray-600">
-            Sign in to continue to BlogPlatform
+            Sign in to continue to Your Account
           </p>
         </div>
 

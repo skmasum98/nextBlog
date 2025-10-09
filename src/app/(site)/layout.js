@@ -1,4 +1,11 @@
 import Sidebar from "@/components/Sidebar";
+import { Inter } from 'next/font/google';
+
+const inter = Inter({
+  subsets: ['latin'],
+  weight: ['400', '700'],
+  display: 'swap', // shows fallback font instantly
+});
 
 export default function SiteLayout({ children }) {
   return (

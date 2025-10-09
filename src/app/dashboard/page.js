@@ -146,7 +146,7 @@ export default function DashboardPage() {
                             posts.map(post => (
                                 <div key={post._id} className="border p-4 rounded-md flex justify-between items-center">
                                     <div>
-                                        <Link href={`/posts/${post._id}`}>
+                                        <Link href={`/posts/${post.slug}`}>
                                             <h3 className="text-xl font-bold hover:text-indigo-600">{post.title}</h3>
                                         </Link>
                                         <p className="text-sm text-gray-500">
@@ -154,10 +154,10 @@ export default function DashboardPage() {
                                         </p>
                                     </div>
                                     <div className="flex space-x-2 flex-shrink-0">
-                                        <Link href={`/posts/${post._id}/edit`} className="bg-blue-500 text-white px-3 py-1 text-sm rounded-md hover:bg-blue-600">
+                                        <Link href={`/posts/${post.slug}/edit`} className="bg-blue-500 text-white px-3 py-1 text-sm rounded-md hover:bg-blue-600">
                                             Edit
                                         </Link>
-                                        <button onClick={() => handleDeletePost(post._id)} className="bg-red-500 text-white px-3 py-1 text-sm rounded-md hover:bg-red-600">
+                                        <button onClick={() => handleDeletePost(post.slug)} className="bg-red-500 text-white px-3 py-1 text-sm rounded-md hover:bg-red-600">
                                             Delete
                                         </button>
                                     </div>

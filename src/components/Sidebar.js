@@ -35,7 +35,7 @@ export default async function Sidebar() {
           {recentPosts.map((post) => (
             <li key={post._id}>
               <Link 
-                href={`/posts/${post._id}`} 
+                href={`/posts/${post.slug}`} 
                 className="hover:text-indigo-800"
               >
                 {post.title}

@@ -164,8 +164,12 @@ export default function CreatePostPage() {
             />
             {preview && (
               <div className="mt-4">
-                
-                <Image src={preview} alt="Preview" className="w-full h-56 object-cover rounded-lg shadow-sm" />
+                <Image 
+                  src={preview} 
+                  alt="Preview"
+                  width={500}
+                  height={500}
+                />
               </div>
             )}
           </div>

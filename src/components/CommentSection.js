@@ -2,25 +2,28 @@
 
 import { useState, useEffect, useCallback } from 'react';
 
-export default function CommentSection({ postId, isAdmin }) {
+export default function CommentSection({ postSlug, isAdmin }) {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchComments = useCallback(async () => {
+
+const fetchComments = useCallback(async () => {
+    if (!postSlug) return;
     try {
       setIsLoading(true);
-      const res = await fetch(`/api/posts/${postId}/comments`);
+      // Construct the URL with the slug
+      const res = await fetch(`/api/posts/${postSlug}/comments`);
       if (!res.ok) throw new Error('Failed to fetch comments');
       const data = await res.json();
-      setComments(data.comments || []);
+      setComments(data.comments);
     } catch (err) {
-      setError(err?.message || 'Unknown error');
+      setError(err.message);
     } finally {
       setIsLoading(false);
     }
-  }, [postId]);
+  }, [postSlug]);
 
   useEffect(() => {
     fetchComments();
@@ -31,7 +34,8 @@ export default function CommentSection({ postId, isAdmin }) {
     if (!newComment.trim()) return;
 
     try {
-      const res = await fetch(`/api/posts/${postId}/comments`, {
+      // Construct the URL with the slug
+      const res = await fetch(`/api/posts/${postSlug}/comments`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content: newComment }),
@@ -39,11 +43,11 @@ export default function CommentSection({ postId, isAdmin }) {
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to post comment');
-
-      setComments((prev) => [...prev, data.comment]);
+      
+      setComments([...comments, data.comment]);
       setNewComment('');
     } catch (err) {
-      setError(err?.message || 'Unknown error');
+      setError(err.message);
     }
   };
 

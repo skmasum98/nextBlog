@@ -3,11 +3,13 @@ import Link from 'next/link';
 import './globals.css';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import siteConfig from '@/lib/siteConfig';
 
 
 export const metadata = {
-  title: 'Next.js Blog Platform',
-  description: 'A feature-rich blog built with Next.js and MongoDB',
+  metadataBase: new URL(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'),
+  title: `${siteConfig.name} - Next.js Blog Platform`,
+  description: 'A feature-rich Thewebpal blog built with Next.js and MongoDB',
 };
 
 export default function RootLayout({ children }) {

@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 export default function UserMenu({ user }) {
     const [isOpen, setIsOpen] = useState(false);
     const router = useRouter();
+    
 
     const handleLogout = async () => {
         await fetch('/api/auth/logout');
@@ -22,7 +23,7 @@ export default function UserMenu({ user }) {
                 onClick={() => setIsOpen(!isOpen)} 
                 className="font-semibold hover:text-indigo-600"
             >
-                Hello, {user.email.split('@')[0]}
+                Hello, {user.name.split(' ')[0]}
             </button>
 
             {/* Dropdown Menu */}

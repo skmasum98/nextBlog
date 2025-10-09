@@ -10,12 +10,17 @@ const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
 
 // GET handler to fetch comments for a post
 export async function GET(request, { params }) {
-  const { postId } = await params;
+  const { slug } = await params;
 
   try {
     await dbConnect();
 
-    const comments = await Comment.find({ post: postId })
+    const post = await Post.findOne({ slug });
+    if (!post) {
+      return NextResponse.json({ error: 'Post not found' }, { status: 404 });
+    }
+
+    const comments = await Comment.find({ post: post._id })
       .populate({
         path: 'author',
         select: 'name',
@@ -35,7 +40,7 @@ export async function GET(request, { params }) {
 
 // POST handler to create a new comment
 export async function POST(request, { params }) {
-  const { postId } = await params;
+  const { slug  } = await params;
 
   try {
   // 1. Authenticate the user
@@ -63,11 +68,16 @@ export async function POST(request, { params }) {
     
     await dbConnect();
 
+    const post = await Post.findOne({ slug });
+    if (!post) {
+      return NextResponse.json({ error: 'Post not found' }, { status: 404 });
+    }
+
     // 3. Create and save the new comment
     const newComment = await Comment.create({
       content,
       author: userId,
-      post: postId,
+      post: post._id,
     });
     
     // We need to populate the author info to send back to the client immediately

@@ -6,9 +6,20 @@ import PaginationControls from '@/components/PaginationControls'; // Import pagi
 
 export const dynamic = 'force-dynamic';
 
+export async function generateMetadata({ params }) {
+    const { slug } = await params;
+    // Capitalize the first letter for a nice title
+    const categoryName = slug.charAt(0).toUpperCase() + slug.slice(1).replace(/-/g, ' ');
+
+    return {
+        title: `Posts in: ${categoryName}`,
+        description: `Browse all blog posts in the ${categoryName} category.`,
+    };
+}
+
 export default async function CategoryPage({ params, searchParams }) {
   // --- CORRECTED: No 'await' on params ---
-  const { slug } = params;
+  const { slug } = await params;
   
   // --- NEW: Read page number from URL ---
   const page = parseInt(searchParams.page || '1', 10);
@@ -38,9 +49,9 @@ export default async function CategoryPage({ params, searchParams }) {
               <div key={post._id} className="bg-white p-6 rounded-lg shadow-md flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-6">
                 {post.coverImage && (
                   <div className="flex-shrink-0 w-full sm:w-48">
-                    <Link href={`/posts/${post._id}`}>
-                      <Image 
-                        src={post.coverImage} 
+                    <Link href={`/posts/${post.slug}`}>
+                      <Image
+                        src={post.coverImage}
                         alt={post.title} 
                         width={200} 
                         height={150} 
@@ -57,7 +68,7 @@ export default async function CategoryPage({ params, searchParams }) {
                     <span>•</span>
                     <span>By {post.author ? post.author.name : 'Unknown'}</span>
                   </div>
-                  <Link href={`/posts/${post._id}`}>
+                  <Link href={`/posts/${post.slug}`}>
                     <h2 className="text-2xl font-semibold mb-2 hover:text-indigo-600">{post.title}</h2>
                   </Link>
                   <p className="text-gray-600 flex-grow">

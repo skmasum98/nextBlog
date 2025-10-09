@@ -1,5 +1,7 @@
 // src/components/Footer.js
 
+import siteConfig from "@/lib/siteConfig";
+
 export default function Footer() {
   const currentYear = new Date().getFullYear();
 
@@ -7,14 +9,14 @@ export default function Footer() {
     <footer className="bg-white shadow-inner mt-16">
       <div className="container mx-auto px-4 py-6">
         <p className="text-center text-sm text-gray-600">
-          &copy; {currentYear} THEWEBPAL. All Rights Reserved. | Developed by{' '}
+          &copy; {currentYear} {siteConfig.name} All Rights Reserved. | Developed by{' '}
           <a
             href="https://thewebpal.com"
             target="_blank"
             rel="noopener noreferrer"
             className="font-semibold text-indigo-600 hover:underline"
           >
-            The Web Pal
+            {siteConfig.name}
           </a>
           .
         </p>

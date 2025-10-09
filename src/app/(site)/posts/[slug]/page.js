@@ -8,23 +8,67 @@ import DOMPurify from 'isomorphic-dompurify';
 import '@/app/globals.css';
 import Link from "next/link";
 
-async function getPost(postId) {
-  // This needs the full URL because it runs on the server
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/posts/${postId}`, {
-    cache: 'no-store',
+// --- UPDATED: Data fetching functions now use SLUG ---
+async function getPostBySlug(slug) {
+  // We use our API route which is now also based on slug
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/posts/${slug}`, {
+    cache: 'no-store', 
   });
-  if (!res.ok) throw new Error('Failed to fetch post');
+  if (!res.ok) {
+    // Return null or throw an error to be caught by a `notFound()` or Error Boundary
+    // For simplicity, we'll let the page component handle the error.
+    return null;
+  }
   return res.json();
 }
 
+
+// --- UPDATED: generateMetadata now uses SLUG ---
+
+export async function generateMetadata({ params }) {
+    const { slug } = await params; // It's a slug now, not postId
+    const postData = await getPostBySlug(slug);
+
+    if (!postData || !postData.post) {
+        return {
+            title: 'Post Not Found',
+            description: 'The post you are looking for does not exist or has been moved.',
+        };
+    }
+
+    const { post } = postData;
+    const plainContent = post.content ? post.content.replace(/<[^>]+>/g, '') : '';
+    const description = plainContent.substring(0, 160); // Standard SEO length
+
+    return {
+        title: post.title,
+        description: description,
+        openGraph: {
+            title: post.title,
+            description: description,
+            images: [
+                {
+                    url: post.coverImage || '/default-opengraph-image.jpg', // Always provide a fallback
+                },
+            ],
+        },
+    };
+}
+
+
 export default async function PostPage({ params }) {
-  const { postId } = await params;
-  
+  const { slug } = await params;
+
   // Fetch post data and user session data in parallel
   const [postData, session] = await Promise.all([
-    getPost(postId),
+    getPostBySlug(slug),
     getUserSession()
   ]);
+
+  if (!postData || !postData.post) {
+      const { notFound } = require('next/navigation');
+      notFound(); // This will render the not-found.js file
+  }
   
   const { post } = postData;
 
@@ -45,6 +89,7 @@ export default async function PostPage({ params }) {
   const hasOuterProse = /^\s*<div[^>]*class=["']?[^"']*\bprose\b[^"']*["']?[^>]*>/i.test(sanitizedContent);
   const contentHtml = hasOuterProse ? sanitizedContent : `<div class="prose prose-lg max-w-none">${sanitizedContent}</div>`;
 
+  
 
   const userId = session?.id || null; // Get user ID or null if not logged in
   const isAdmin = session?.role === 'admin';
@@ -58,8 +103,6 @@ export default async function PostPage({ params }) {
             alt={post.title}
             width={800}
             height={400}
-            className="w-full h-auto object-cover rounded-lg shadow-md"
-            priority // Load this image first
           />
         </div>
       )}
@@ -94,8 +137,8 @@ export default async function PostPage({ params }) {
   }}
 />
       </div>
-      
-      <CommentSection postId={postId} isAdmin={isAdmin} />
+
+      <CommentSection postSlug={post.slug} isAdmin={isAdmin} />
     </div>
   );
 }

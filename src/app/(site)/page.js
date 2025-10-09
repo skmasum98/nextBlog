@@ -36,7 +36,7 @@ export default async function Home({ searchParams }) {
             >
               {post.coverImage && (
                 <div className="flex-shrink-0 w-full sm:w-48">
-                  <Link href={`/posts/${post._id}`}>
+                  <Link href={`/posts/${post.slug}`}>
                     <Image
                       src={post.coverImage}
                       alt={post.title}
@@ -62,11 +62,11 @@ export default async function Home({ searchParams }) {
                   <span>{new Date(post.createdAt).toLocaleDateString()}</span>
                 </div>
 
-                <Link href={`/posts/${post._id}`}>
+                <Link href={`/posts/${post.slug}`}>
                   <h2 className="text-2xl font-semibold mb-2 hover:text-indigo-600">{post.title}</h2>
                 </Link>
 
-                <p className="text-gray-700 flex-grow">
+                <p className="text-gray-800">
                   {createSnippet(post.content)}
                 </p>
               </div>
